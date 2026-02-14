@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevOS - Focus Mode</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+    <div class="app-contain">
+        <!-- Minimal Sidebar -->
+        <aside class="sidebar">
+            <img src="logo.png" alt="VIT-AP" class="logo-img">
+            <div class="logo">DevOS</div>
+
+            <div class="nav-group">
+                <h3 class="nav-label">Workspace</h3>
+                <nav class="nav-menu">
+                    <a href="index.html" class="nav-item">Dashboard</a>
+                    <a href="focus.html" class="nav-item active">Focus Mode</a>
+                    <a href="#" class="nav-item">Tasks</a>
+                    <a href="#" class="nav-item">Notes</a>
+                </nav>
+            </div>
+
+            <div class="nav-divider"></div>
+
+            <div class="nav-group">
+                <h3 class="nav-label">Manage</h3>
+                <nav class="nav-menu">
+                    <a href="#" class="nav-item">Archive</a>
+                    <a href="#" class="nav-item">Settings</a>
+                </nav>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="page-header">
+                <h1>Focus Mode</h1>
+                <p class="subtitle">Minimal distraction workspace</p>
+            </header>
+
+            <div class="content-stack centered-focus">
+
+                <!-- Editable Timer Input -->
+                <input type="text" class="timer-input" value="00:00" placeholder="00:00">
+
+                <button class="btn-focus-start">Start Session</button>
+
+            </div>
+        </main>
+    </div>
+
+</body>
+
+</html>

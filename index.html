@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevOS - Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+    <div class="app-contain">
+        <!-- Minimal Sidebar -->
+        <aside class="sidebar">
+            <img src="logo.png" alt="VIT-AP" class="logo-img">
+            <div class="logo">DevOS</div>
+
+            <div class="nav-group">
+                <h3 class="nav-label">Workspace</h3>
+                <nav class="nav-menu">
+                    <a href="index.html" class="nav-item active">Dashboard</a>
+                    <a href="focus.html" class="nav-item">Focus Mode</a>
+                    <a href="#" class="nav-item">Tasks</a>
+                    <a href="#" class="nav-item">Notes</a>
+                </nav>
+            </div>
+
+            <div class="nav-divider"></div>
+
+            <div class="nav-group">
+                <h3 class="nav-label">Manage</h3>
+                <nav class="nav-menu">
+                    <a href="#" class="nav-item">Archive</a>
+                    <a href="#" class="nav-item">Settings</a>
+                </nav>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="page-header">
+                <h1>Dashboard</h1>
+                <p class="subtitle">Workspace overview</p>
+            </header>
+
+            <div class="content-stack">
+
+                <!-- Section 1: Tasks -->
+                <section class="content-block">
+                    <h2 class="section-title">TASKS</h2>
+
+                    <div class="task-input-wrapper">
+                        <input type="text" class="task-input" placeholder="Add a new task...">
+                        <button class="btn-add">Add</button>
+                    </div>
+
+                    <div class="task-list empty">
+                        <p class="empty-state-text">No tasks yet</p>
+                    </div>
+                </section>
+
+                <!-- Section 2: Notes -->
+                <section class="content-block">
+                    <h2 class="section-title">QUICK NOTES</h2>
+                    <div class="notes-container">
+                        <textarea class="notes-input" placeholder="Write something..."></textarea>
+                    </div>
+                    <p class="meta-text">Last saved just now</p>
+                </section>
+
+            </div>
+
+    </div>
+    </main>
+    </div>
+
+</body>
+
+</html>
