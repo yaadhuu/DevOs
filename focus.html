@@ -1,18 +1,100 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DevOS - Focus Mode</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Focus-specific styles that extend the base */
+        .focus-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding-top: 20px;
+        }
+        .timer-display {
+            font-size: 5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -2px;
+            margin: 40px 0;
+            font-family: 'Inter', monospace;
+        }
+        .focus-status {
+            color: var(--text-muted);
+            font-size: 1rem;
+            margin-bottom: 30px;
+        }
+        .focus-buttons {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 40px;
+        }
+        .btn-focus {
+            padding: 12px 32px;
+            border: 1px solid var(--border-color);
+            background: transparent;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            font-weight: 500;
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+        .btn-focus:hover {
+            background: var(--text-primary);
+            color: var(--bg-layer);
+            border-color: var(--text-primary);
+        }
+        .btn-focus.active {
+            background: var(--text-primary);
+            color: var(--bg-layer);
+        }
+        .focus-task-input {
+            width: 100%;
+            max-width: 400px;
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            font-family: inherit;
+            font-size: 0.95rem;
+            outline: none;
+            color: var(--text-primary);
+            margin-bottom: 40px;
+        }
+        .focus-task-input:focus {
+            border-color: var(--text-primary);
+        }
+        .session-log {
+            width: 100%;
+            max-width: 500px;
+            text-align: left;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .session-log h3 {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+        .session-log p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+    </style>
 </head>
-
 <body>
-
     <div class="app-contain">
-        <!-- Minimal Sidebar -->
+        <!-- Sidebar - same structure as other pages -->
         <aside class="sidebar">
             <img src="logo.png" alt="VIT-AP" class="logo-img">
             <div class="logo">DevOS</div>
@@ -20,10 +102,10 @@
             <div class="nav-group">
                 <h3 class="nav-label">Workspace</h3>
                 <nav class="nav-menu">
-                    <a href="index.html" class="nav-item">Dashboard</a>
+                    <a href="dashboard.html" class="nav-item">Dashboard</a>
                     <a href="focus.html" class="nav-item active">Focus Mode</a>
-                    <a href="#" class="nav-item">Tasks</a>
-                    <a href="#" class="nav-item">Notes</a>
+                    <a href="tasks.html" class="nav-item">Tasks</a>
+                    <a href="notes.html" class="nav-item">Notes</a>
                 </nav>
             </div>
 
@@ -32,30 +114,125 @@
             <div class="nav-group">
                 <h3 class="nav-label">Manage</h3>
                 <nav class="nav-menu">
-                    <a href="#" class="nav-item">Archive</a>
-                    <a href="#" class="nav-item">Settings</a>
+                    <a href="archive.html" class="nav-item">Archive</a>
+                    <a href="settings.html" class="nav-item">Settings</a>
                 </nav>
             </div>
         </aside>
 
-        <!-- Main Content -->
+        <!-- Main Content  -->
         <main class="main-content">
             <header class="page-header">
                 <h1>Focus Mode</h1>
-                <p class="subtitle">Minimal distraction workspace</p>
+                <p class="subtitle">Pomodoro timer for deep work</p>
             </header>
 
-            <div class="content-stack centered-focus">
+            <div class="content-stack">
+                <section class="content-block">
+                    <div class="focus-container">
+                        <div class="timer-display" id="timer">25:00</div>
+                        <div class="focus-status" id="status">Ready to focus</div>
 
-                <!-- Editable Timer Input -->
-                <input type="text" class="timer-input" value="00:00" placeholder="00:00">
+                        <div class="focus-buttons">
+                            <button class="btn-focus" id="startBtn">Start</button>
+                            <button class="btn-focus" id="pauseBtn" style="display:none;">Pause</button>
+                            <button class="btn-focus" onclick="resetTimer()">Reset</button>
+                        </div>
 
-                <button class="btn-focus-start">Start Session</button>
+                        <input type="text" id="taskTitle" class="focus-task-input" placeholder="What are you working on?">
 
+                        <div class="session-log">
+                            <h3>Session History</h3>
+                            <p id="sessionLog">No sessions saved yet...</p>
+                        </div>
+                    </div>
+                </section>
             </div>
         </main>
     </div>
 
-</body>
+    <script>
+        let timerInterval;
+        let timeLeft = 25 * 60;
+        let isRunning = false;
 
+        const timerEl = document.getElementById('timer');
+        const statusEl = document.getElementById('status');
+        const startBtn = document.getElementById('startBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const taskInput = document.getElementById('taskTitle');
+        const sessionLogEl = document.getElementById('sessionLog');
+
+        function formatTime(seconds) {
+            const min = Math.floor(seconds / 60);
+            const sec = seconds % 60;
+            return `${min.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
+        }
+
+        function updateDisplay() {
+            timerEl.textContent = formatTime(timeLeft);
+        }
+
+        function toggleTimer() {
+            if (!isRunning) {
+                isRunning = true;
+                startBtn.style.display = 'none';
+                pauseBtn.style.display = 'inline-block';
+                statusEl.textContent = "Focusing... stay in the zone";
+                startBtn.classList.add('active');
+
+                timerInterval = setInterval(() => {
+                    timeLeft--;
+                    updateDisplay();
+                    if (timeLeft <= 0) {
+                        clearInterval(timerInterval);
+                        timerComplete();
+                    }
+                }, 1000);
+            } else {
+                isRunning = false;
+                clearInterval(timerInterval);
+                startBtn.style.display = 'inline-block';
+                pauseBtn.style.display = 'none';
+                statusEl.textContent = "Paused";
+            }
+        }
+
+        async function timerComplete() {
+            isRunning = false;
+            startBtn.style.display = 'inline-block';
+            pauseBtn.style.display = 'none';
+            statusEl.textContent = "Session complete! Saving...";
+
+            const taskTitle = taskInput.value.trim() || "Deep Focus Session";
+
+            try {
+                await fetch('/api/focus', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ durationMinutes: 25 })
+                });
+                statusEl.textContent = `✓ Saved "${taskTitle}" (25 min)`;
+            } catch (error) {
+                statusEl.textContent = "Failed to save session";
+                console.error(error);
+            }
+        }
+
+        function resetTimer() {
+            clearInterval(timerInterval);
+            timeLeft = 25 * 60;
+            isRunning = false;
+            updateDisplay();
+            startBtn.style.display = 'inline-block';
+            pauseBtn.style.display = 'none';
+            statusEl.textContent = "Ready to focus";
+        }
+
+        startBtn.addEventListener('click', toggleTimer);
+        pauseBtn.addEventListener('click', toggleTimer);
+
+        window.onload = () => { updateDisplay(); };
+    </script>
+</body>
 </html>

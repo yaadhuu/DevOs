@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevOS - Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+    <div class="app-contain">
+        <!-- Minimal Sidebar -->
+        <aside class="sidebar">
+            <img src="logo.png" alt="VIT-AP" class="logo-img">
+            <div class="logo">DevOS</div>
+
+            <div class="nav-group">
+                <h3 class="nav-label">Workspace</h3>
+                <nav class="nav-menu">
+                    <a href="dashboard.html" class="nav-item active">Dashboard</a>
+                    <a href="focus.html" class="nav-item">Focus Mode</a>
+                    <a href="tasks.html" class="nav-item">Tasks</a>
+                    <a href="notes.html" class="nav-item">Notes</a>
+                </nav>
+            </div>
+
+            <div class="nav-divider"></div>
+
+            <div class="nav-group">
+                <h3 class="nav-label">Manage</h3>
+                <nav class="nav-menu">
+                    <a href="archive.html" class="nav-item">Archive</a>
+                    <a href="settings.html" class="nav-item">Settings</a>
+                </nav>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="page-header">
+                <h1>Dashboard</h1>
+                <p class="subtitle">Workspace overview</p>
+            </header>
+
+            <div class="content-stack">
+
+                <!-- Section 1: Tasks -->
+                <section class="content-block">
+                    <h2 class="section-title">TASKS</h2>
+
+                    <div class="task-input-wrapper">
+                        <input type="text" id="new-task-input-dash" class="task-input" placeholder="Add a new task...">
+                        <button class="btn-add" onclick="addTaskDash()">Add</button>
+                    </div>
+
+                    <div class="task-list" id="dash-task-list">
+                        <p class="empty-state-text">Loading tasks...</p>
+                    </div>
+                </section>
+
+                <!-- Section 2: Notes -->
+                <section class="content-block">
+                    <h2 class="section-title">QUICK NOTES</h2>
+                    <div class="notes-container">
+                        <textarea class="notes-input" placeholder="Write something..."></textarea>
+                    </div>
+                    <p class="meta-text">Last saved just now</p>
+                </section>
+
+            </div>
+
+    </div>
+    </main>
+    </div>
+
+    <script>
+        // Live integration for dashboard
+        async function fetchTasksDash() {
+            try {
+                const res = await fetch('/api/tasks');
+                const data = await res.json();
+                const list = document.getElementById('dash-task-list');
+                list.innerHTML = '';
+                if(data.success && data.tasks.length > 0) {
+                    let ul = '<ul class="checklist">';
+                    data.tasks.slice(0, 5).forEach(task => {
+                        ul += `
+                            <li class="checklist-item">
+                                <input type="checkbox" id="task_${task.id}" ${task.status==='completed'?'checked':''}>
+                                <label for="task_${task.id}">${task.title}</label>
+                            </li>
+                        `;
+                    });
+                    ul += '</ul>';
+                    list.innerHTML = ul;
+                } else {
+                    list.innerHTML = '<p class="empty-state-text" style="font-style: italic;">No tasks yet</p>';
+                }
+            } catch(e) {
+                console.error(e);
+            }
+        }
+        
+        async function addTaskDash() {
+            const input = document.getElementById('new-task-input-dash');
+            const title = input.value.trim();
+            if(!title) return;
+            try {
+                const res = await fetch('/api/tasks', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({title})
+                });
+                if(res.ok) {
+                    input.value = '';
+                    fetchTasksDash();
+                }
+            } catch(e) {
+                console.error(e);
+            }
+        }
+
+        // Allow Enter key to add task
+        document.getElementById('new-task-input-dash').addEventListener('keydown', e => {
+            if(e.key === 'Enter') addTaskDash();
+        });
+
+        window.onload = fetchTasksDash;
+    </script>
+</body>
+</html>

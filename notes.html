@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevOS - Notes</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+    <div class="app-contain">
+        <!-- Minimal Sidebar -->
+        <aside class="sidebar">
+            <img src="logo.png" alt="VIT-AP" class="logo-img">
+            <div class="logo">DevOS</div>
+
+            <div class="nav-group">
+                <h3 class="nav-label">Workspace</h3>
+                <nav class="nav-menu">
+                    <a href="dashboard.html" class="nav-item">Dashboard</a>
+                    <a href="focus.html" class="nav-item">Focus Mode</a>
+                    <a href="tasks.html" class="nav-item">Tasks</a>
+                    <a href="notes.html" class="nav-item active">Notes</a>
+                </nav>
+            </div>
+
+            <div class="nav-divider"></div>
+
+            <div class="nav-group">
+                <h3 class="nav-label">Manage</h3>
+                <nav class="nav-menu">
+                    <a href="archive.html" class="nav-item">Archive</a>
+                    <a href="settings.html" class="nav-item">Settings</a>
+                </nav>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="page-header">
+                <h1>Notes</h1>
+                <p class="subtitle">Ideas and documentation</p>
+            </header>
+
+            <div class="content-stack">
+
+                <section class="content-block">
+                    <h2 class="section-title">NEW NOTE</h2>
+                    <div class="notes-container">
+                        <textarea id="new-note-input" class="notes-input" placeholder="Write a new note..."></textarea>
+                    </div>
+                    <button class="btn-add" onclick="addNote()" style="margin-top: 8px;">Save Note</button>
+                </section>
+
+                <section class="content-block">
+                    <h2 class="section-title">SAVED NOTES</h2>
+                    <div class="notes-grid" id="notes-grid-container">
+                        <div style="color: var(--text-muted); font-style: italic;">Loading notes...</div>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <script>
+        async function fetchNotes() {
+            try {
+                const res = await fetch('/api/notes');
+                const data = await res.json();
+                const container = document.getElementById('notes-grid-container');
+                container.innerHTML = '';
+                if(data.success && data.notes.length > 0) {
+                    data.notes.forEach(note => {
+                        container.innerHTML += `
+                            <div class="note-card">
+                                <h3>Note</h3>
+                                <p>${note.content}</p>
+                                <span class="note-date">Saved</span>
+                            </div>
+                        `;
+                    });
+                } else {
+                    container.innerHTML = '<div style="color: var(--text-muted); font-style: italic;">No notes yet</div>';
+                }
+            } catch(e) {
+                console.error(e);
+            }
+        }
+        
+        async function addNote() {
+            const input = document.getElementById('new-note-input');
+            const content = input.value.trim();
+            if(!content) return;
+            try {
+                const res = await fetch('/api/notes', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({content})
+                });
+                if(res.ok) {
+                    input.value = '';
+                    fetchNotes();
+                }
+            } catch(e) {
+                console.error(e);
+            }
+        }
+
+        window.onload = fetchNotes;
+    </script>
+</body>
+</html>

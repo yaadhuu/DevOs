@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevOS - Faculty Access</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .login-container {
+            max-width: 400px;
+            margin: 100px auto;
+            background-color: var(--surface);
+            padding: 2rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+        .login-container h2 {
+            margin-bottom: 1.5rem;
+            color: var(--text);
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: var(--background);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            color: var(--text);
+            box-sizing: border-box;
+        }
+        .btn-login {
+            width: 100%;
+            background-color: var(--primary);
+            color: var(--text);
+            border: none;
+            padding: 0.75rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            margin-top: 1rem;
+        }
+        .btn-login:hover {
+            background-color: var(--primary-hover);
+        }
+        .error-message {
+            color: #ef4444;
+            margin-top: 1rem;
+            font-size: 0.875rem;
+            display: none;
+        }
+        #dashboard-view {
+            display: none;
+        }
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        .data-table th, .data-table td {
+            text-align: left;
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .data-table th {
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+        .node-properties {
+            background-color: var(--background);
+            padding: 0.5rem;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-contain">
+        <!-- Minimal Sidebar -->
+        <aside class="sidebar">
+            <img src="logo.png" alt="VIT-AP" class="logo-img">
+            <div class="logo">DevOS</div>
+
+            <div class="nav-group">
+                <h3 class="nav-label">Workspace</h3>
+                <nav class="nav-menu">
+                    <a href="dashboard.html" class="nav-item">Dashboard</a>
+                    <a href="focus.html" class="nav-item">Focus Mode</a>
+                    <a href="tasks.html" class="nav-item">Tasks</a>
+                    <a href="notes.html" class="nav-item">Notes</a>
+                </nav>
+            </div>
+
+            <div class="nav-divider"></div>
+
+            <div class="nav-group">
+                <h3 class="nav-label">Manage</h3>
+                <nav class="nav-menu">
+                    <a href="archive.html" class="nav-item">Archive</a>
+                    <a href="settings.html" class="nav-item">Settings</a>
+                    <a href="faculty.html" class="nav-item active">Faculty Access</a>
+                </nav>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            
+            <!-- Login View -->
+            <div id="login-view" class="login-container">
+                <h2>Faculty Login</h2>
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" placeholder="Enter faculty username">
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" placeholder="Enter password">
+                </div>
+                <button class="btn-login" onclick="handleLogin()">Login</button>
+                <div id="login-error" class="error-message">Invalid credentials</div>
+                <p style="margin-top: 1rem; font-size: 0.8rem; color: var(--text-muted);">Demo credentials: faculty / password123</p>
+            </div>
+
+            <!-- Dashboard View -->
+            <div id="dashboard-view">
+                <header class="page-header">
+                    <h1>Live Database View</h1>
+                    <p class="subtitle">Neo4j Database Output</p>
+                </header>
+                
+                <section class="content-block">
+                    <h2 class="section-title">DATABASE NODES</h2>
+                    <div id="loading" style="padding: 1rem; color: var(--text-muted);">Loading data...</div>
+                    <table class="data-table" id="data-table" style="display: none;">
+                        <thead>
+                            <tr>
+                                <th>Labels</th>
+                                <th>Properties</th>
+                            </tr>
+                        </thead>
+                        <tbody id="data-body">
+                            <!-- Data rows will be inserted here -->
+                        </tbody>
+                    </table>
+                </section>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        async function handleLogin() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const errorElement = document.getElementById('login-error');
+
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    errorElement.style.display = 'none';
+                    document.getElementById('login-view').style.display = 'none';
+                    document.getElementById('dashboard-view').style.display = 'block';
+                    fetchData();
+                } else {
+                    errorElement.style.display = 'block';
+                    errorElement.textContent = data.message || 'Invalid credentials';
+                }
+            } catch (err) {
+                console.error("Login failed:", err);
+                errorElement.style.display = 'block';
+                errorElement.textContent = 'Server error during login.';
+            }
+        }
+
+        async function fetchData() {
+            try {
+                const response = await fetch('/api/data');
+                const data = await response.json();
+
+                document.getElementById('loading').style.display = 'none';
+                
+                if (data.success) {
+                    const tbody = document.getElementById('data-body');
+                    const table = document.getElementById('data-table');
+                    
+                    if (data.nodes.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="2" style="text-align: center; color: var(--text-muted);">No data found in database.</td></tr>';
+                    } else {
+                        data.nodes.forEach(node => {
+                            const tr = document.createElement('tr');
+                            
+                            const tdLabel = document.createElement('td');
+                            tdLabel.textContent = node.labels.join(', ') || 'No Label';
+                            
+                            const tdProps = document.createElement('td');
+                            tdProps.className = 'node-properties';
+                            tdProps.textContent = JSON.stringify(node.properties, null, 2);
+                            
+                            tr.appendChild(tdLabel);
+                            tr.appendChild(tdProps);
+                            tbody.appendChild(tr);
+                        });
+                    }
+                    
+                    table.style.display = 'table';
+                } else {
+                    document.getElementById('loading').style.display = 'block';
+                    document.getElementById('loading').textContent = 'Error loading data: ' + data.error;
+                }
+            } catch (err) {
+                console.error("Data fetch failed:", err);
+                document.getElementById('loading').style.display = 'block';
+                document.getElementById('loading').textContent = 'Server error during data fetch.';
+            }
+        }
+    </script>
+</body>
+</html>

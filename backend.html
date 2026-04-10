@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevOS - Neo4j Browser</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body, html {
+            width: 100%; height: 100%;
+            font-family: 'Inter', sans-serif;
+            background: #111114;
+            color: #d4d4d8;
+            overflow: hidden;
+        }
+
+        /* LOGIN */
+        #login-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #111114;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 1000;
+        }
+        .login-box {
+            background: #18181b; padding: 2.5rem; border-radius: 10px;
+            border: 1px solid #27272a; width: 320px; text-align: center;
+        }
+        .login-box img { width: 50px; margin-bottom: 1rem; border-radius: 6px; }
+        .login-box h2 { color: #fafafa; margin-bottom: 1.5rem; font-size: 1.2rem; font-weight: 600; }
+        .login-box input {
+            width: 100%; padding: 0.7rem 0.8rem; margin: 0.35rem 0;
+            background: #09090b; border: 1px solid #27272a;
+            color: #fafafa; border-radius: 6px; font-size: 0.85rem;
+            font-family: inherit;
+        }
+        .login-box input:focus { outline: none; border-color: #52525b; }
+        .login-box button {
+            width: 100%; padding: 0.75rem; margin-top: 1rem;
+            background: #fafafa; color: #09090b; font-weight: 600;
+            border: none; border-radius: 6px; cursor: pointer; font-size: 0.85rem;
+        }
+        .login-box button:hover { background: #e4e4e7; }
+        .login-error { color: #ef4444; margin-top: 8px; font-size: 0.8rem; display: none; }
+        .cred-hint {
+            margin-top: 1.2rem; padding: 0.7rem; background: #09090b;
+            border: 1px solid #27272a; border-radius: 6px; text-align: left;
+        }
+        .cred-hint .label {
+            font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1px;
+            color: #71717a; margin-bottom: 0.35rem; font-weight: 500;
+        }
+        .cred-hint .row {
+            font-size: 0.8rem; color: #a1a1aa;
+        }
+        .cred-hint .row span {
+            color: #fafafa; font-family: 'Fira Code', monospace; font-size: 0.78rem;
+        }
+
+        /* LAYOUT */
+        .app-layout { display: flex; width: 100%; height: 100%; }
+
+        .sidebar {
+            width: 340px; min-width: 340px;
+            background: #18181b;
+            border-right: 1px solid #27272a;
+            display: flex; flex-direction: column;
+            padding: 1.2rem; overflow-y: auto;
+        }
+        .back-link {
+            color: #71717a; text-decoration: none; font-size: 0.8rem;
+            margin-bottom: 1.2rem;
+        }
+        .back-link:hover { color: #a1a1aa; }
+        .logo-row {
+            display: flex; align-items: center; gap: 10px;
+            font-weight: 600; font-size: 1.1rem; color: #fafafa;
+            margin-bottom: 1.5rem;
+        }
+        .logo-row img { width: 28px; border-radius: 4px; }
+        .section-label {
+            font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1.2px;
+            color: #52525b; margin: 1rem 0 0.5rem; font-weight: 500;
+        }
+        .form-group { margin-bottom: 0.6rem; }
+        .form-group label { display: block; font-size: 0.72rem; margin-bottom: 0.25rem; color: #71717a; }
+        .form-group input {
+            width: 100%; padding: 0.5rem; background: #09090b;
+            border: 1px solid #27272a; color: #d4d4d8; border-radius: 5px;
+            font-family: 'Fira Code', monospace; font-size: 0.75rem;
+        }
+        .editor textarea {
+            width: 100%; height: 110px; background: #09090b;
+            border: 1px solid #27272a; color: #a3e635; padding: 0.7rem;
+            border-radius: 5px; font-family: 'Fira Code', monospace; font-size: 0.8rem;
+            resize: none;
+        }
+        .editor textarea:focus { outline: none; border-color: #3f3f46; }
+        .btn-run {
+            background: #fafafa; color: #09090b; border: none;
+            padding: 0.65rem; width: 100%; font-weight: 600; font-size: 0.82rem;
+            border-radius: 5px; cursor: pointer; margin-top: 0.7rem;
+        }
+        .btn-run:hover { background: #e4e4e7; }
+        .error-msg {
+            color: #ef4444; font-size: 0.78rem; margin-top: 0.6rem;
+            display: none; word-break: break-word;
+        }
+        .stats {
+            margin-top: 0.8rem; padding: 0.6rem; background: #09090b;
+            border-radius: 5px; border: 1px solid #27272a; font-size: 0.78rem;
+            color: #71717a; display: none;
+        }
+        .stats span { color: #fafafa; font-weight: 600; }
+
+        /* GRAPH */
+        .graph-area { flex: 1; position: relative; background: #09090b; }
+        #graph-container { width: 100%; height: 100%; }
+        #loading-indicator {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            color: #71717a; font-size: 0.85rem;
+            background: #18181b; padding: 0.8rem 1.5rem;
+            border-radius: 6px; border: 1px solid #27272a;
+            display: none; z-index: 5;
+        }
+
+        /* NODE INFO */
+        #node-info {
+            position: absolute; bottom: 16px; right: 16px;
+            background: #18181b; border: 1px solid #27272a;
+            border-radius: 8px; padding: 1rem; min-width: 260px; max-width: 360px;
+            display: none; z-index: 5;
+        }
+        #node-info h3 { color: #fafafa; margin-bottom: 0.5rem; font-size: 0.85rem; font-weight: 600; }
+        #node-info pre {
+            color: #a1a1aa; font-size: 0.72rem; white-space: pre-wrap;
+            font-family: 'Fira Code', monospace; max-height: 180px; overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-overlay">
+    <div class="login-box">
+        <img src="logo.png" alt="Logo">
+        <h2>Faculty Login</h2>
+        <input type="text" id="fac-user" placeholder="Username">
+        <input type="password" id="fac-pass" placeholder="Password">
+        <button onclick="doLogin()">Enter Database</button>
+        <div id="login-err" class="login-error">Invalid credentials</div>
+        <div class="cred-hint">
+            <div class="label">Credentials</div>
+            <div class="row">Username: <span>faculty</span></div>
+            <div class="row">Password: <span>password123</span></div>
+        </div>
+    </div>
+</div>
+
+<!-- APP -->
+<div class="app-layout">
+    <div class="sidebar">
+        <a href="index.html" class="back-link">← Back</a>
+        <div class="logo-row">
+            <img src="logo.png" alt="Logo"> Neo4j Database
+        </div>
+
+        <div class="section-label">Connection</div>
+        <div class="form-group">
+            <label>URI</label>
+            <input type="text" value="neo4j+s://5347e055.databases.neo4j.io" readonly>
+        </div>
+        <div class="form-group">
+            <label>Username</label>
+            <input type="text" value="5347e055" readonly>
+        </div>
+        <div class="form-group">
+            <label>Password</label>
+            <input type="password" value="LYiTGTpmvrKF9gvag773weJ-FCAcC1pzHFXuinpiKyU" readonly>
+        </div>
+
+        <div class="section-label">Cypher Query</div>
+        <div class="editor">
+            <textarea id="cypher-input">MATCH (n)
+OPTIONAL MATCH (n)-[r]->(m)
+RETURN n, r, m
+LIMIT 100</textarea>
+        </div>
+        <button class="btn-run" onclick="runQuery()">Run Query</button>
+        <div id="error-msg" class="error-msg"></div>
+        <div id="stats" class="stats"></div>
+    </div>
+
+    <div class="graph-area">
+        <div id="loading-indicator">Running query...</div>
+        <div id="graph-container"></div>
+        <div id="node-info">
+            <h3 id="node-info-title">Node</h3>
+            <pre id="node-info-body"></pre>
+        </div>
+    </div>
+</div>
+
+<script>
+    function doLogin() {
+        const u = document.getElementById('fac-user').value.trim();
+        const p = document.getElementById('fac-pass').value.trim();
+        if (u === 'faculty' && p === 'password123') {
+            document.getElementById('login-overlay').style.display = 'none';
+            runQuery();
+        } else {
+            document.getElementById('login-err').style.display = 'block';
+        }
+    }
+    document.getElementById('fac-pass').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+
+    const labelColors = {
+        'User':         { bg: '#3b82f6', border: '#2563eb', font: '#fff' },
+        'Task':         { bg: '#8b5cf6', border: '#7c3aed', font: '#fff' },
+        'Note':         { bg: '#f59e0b', border: '#d97706', font: '#000' },
+        'FocusSession': { bg: '#10b981', border: '#059669', font: '#fff' },
+    };
+    const defaultColor = { bg: '#6b7280', border: '#4b5563', font: '#fff' };
+
+    function getNodeColor(labels) {
+        for (const l of labels) { if (labelColors[l]) return labelColors[l]; }
+        return defaultColor;
+    }
+
+    function getNodeLabel(labels, props) {
+        const label = labels[0] || 'Node';
+        if (props.name) return label + '\n' + props.name;
+        if (props.title) return label + '\n' + props.title;
+        if (props.content) return label + '\n' + (props.content.length > 25 ? props.content.substring(0,25)+'…' : props.content);
+        if (props.duration) return label + '\n' + props.duration + ' min';
+        return label;
+    }
+
+    let network = null;
+
+    async function runQuery() {
+        const cypher = document.getElementById('cypher-input').value.trim();
+        const errorEl = document.getElementById('error-msg');
+        const statsEl = document.getElementById('stats');
+        const loadingEl = document.getElementById('loading-indicator');
+        const nodeInfoEl = document.getElementById('node-info');
+
+        errorEl.style.display = 'none';
+        statsEl.style.display = 'none';
+        nodeInfoEl.style.display = 'none';
+        loadingEl.style.display = 'block';
+
+        try {
+            const res = await fetch('/api/query', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ cypher })
+            });
+            const data = await res.json();
+            if (!data.success) throw new Error(data.error || 'Query failed');
+
+            const visNodes = data.nodes.map(n => {
+                const c = getNodeColor(n.labels);
+                return {
+                    id: n.id,
+                    label: getNodeLabel(n.labels, n.properties),
+                    color: { background: c.bg, border: c.border, highlight: { background: c.bg, border: '#fafafa' } },
+                    font: { color: c.font, size: 12, face: 'Inter' },
+                    shape: 'dot',
+                    size: n.labels.includes('User') ? 30 : 20,
+                    borderWidth: 2,
+                    _labels: n.labels,
+                    _props: n.properties
+                };
+            });
+
+            const visEdges = data.edges.map((e, i) => ({
+                id: 'e' + i, from: e.from, to: e.to, label: e.type,
+                color: { color: '#3f3f46', highlight: '#71717a' },
+                font: { color: '#52525b', size: 9, face: 'Inter', strokeWidth: 0 },
+                arrows: { to: { enabled: true, scaleFactor: 0.5 } },
+                smooth: { enabled: true, type: 'continuous' }
+            }));
+
+            const container = document.getElementById('graph-container');
+            const netData = { nodes: new vis.DataSet(visNodes), edges: new vis.DataSet(visEdges) };
+            const options = {
+                physics: {
+                    forceAtlas2Based: { gravitationalConstant: -80, centralGravity: 0.008, springLength: 200, springConstant: 0.05 },
+                    maxVelocity: 40, solver: 'forceAtlas2Based', stabilization: { iterations: 120 }
+                },
+                interaction: { hover: true, tooltipDelay: 100 }
+            };
+
+            if (network) network.destroy();
+            network = new vis.Network(container, netData, options);
+
+            network.on('click', params => {
+                if (params.nodes.length > 0) {
+                    const nd = visNodes.find(n => n.id === params.nodes[0]);
+                    if (nd) {
+                        document.getElementById('node-info-title').textContent = nd._labels.join(', ');
+                        document.getElementById('node-info-body').textContent = JSON.stringify(nd._props, null, 2);
+                        nodeInfoEl.style.display = 'block';
+                    }
+                } else { nodeInfoEl.style.display = 'none'; }
+            });
+
+            loadingEl.style.display = 'none';
+            statsEl.innerHTML = 'Nodes: <span>' + data.nodes.length + '</span> · Relationships: <span>' + data.edges.length + '</span>';
+            statsEl.style.display = 'block';
+        } catch (err) {
+            loadingEl.style.display = 'none';
+            errorEl.textContent = err.message;
+            errorEl.style.display = 'block';
+        }
+    }
+</script>
+</body>
+</html>

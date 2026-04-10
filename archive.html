@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevOS - Archive</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+    <div class="app-contain">
+        <!-- Minimal Sidebar -->
+        <aside class="sidebar">
+            <img src="logo.png" alt="VIT-AP" class="logo-img">
+            <div class="logo">DevOS</div>
+
+            <div class="nav-group">
+                <h3 class="nav-label">Workspace</h3>
+                <nav class="nav-menu">
+                    <a href="dashboard.html" class="nav-item">Dashboard</a>
+                    <a href="focus.html" class="nav-item">Focus Mode</a>
+                    <a href="tasks.html" class="nav-item">Tasks</a>
+                    <a href="notes.html" class="nav-item">Notes</a>
+                </nav>
+            </div>
+
+            <div class="nav-divider"></div>
+
+            <div class="nav-group">
+                <h3 class="nav-label">Manage</h3>
+                <nav class="nav-menu">
+                    <a href="archive.html" class="nav-item active">Archive</a>
+                    <a href="settings.html" class="nav-item">Settings</a>
+                </nav>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="page-header">
+                <h1>Archive</h1>
+                <p class="subtitle">Completed tasks and old notes</p>
+            </header>
+
+            <div class="content-stack">
+
+                <section class="content-block">
+                    <table class="archive-table">
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th>Type</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Fix navigation bug in header</td>
+                                <td>Task</td>
+                                <td>Oct 24, 2025</td>
+                            </tr>
+                            <tr>
+                                <td>Q3 Planning Doc</td>
+                                <td>Note</td>
+                                <td>Oct 20, 2025</td>
+                            </tr>
+                            <tr>
+                                <td>Update dependencies</td>
+                                <td>Task</td>
+                                <td>Oct 18, 2025</td>
+                            </tr>
+                            <tr>
+                                <td>Competitor Analysis</td>
+                                <td>Note</td>
+                                <td>Sep 30, 2025</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+</body>
+
+</html>

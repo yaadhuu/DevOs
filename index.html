@@ -1,81 +1,122 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DevOS - Dashboard</title>
-    <link rel="stylesheet" href="style.css">
+    <title>DevOS - Developer Productivity OS</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            min-height: 100vh;
+            background: #ffffff;
+            color: #111111;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .landing {
+            text-align: center;
+            max-width: 640px;
+            padding: 2rem;
+        }
+        .logo-img {
+            width: 90px;
+            height: auto;
+            margin-bottom: 2rem;
+            border-radius: 8px;
+        }
+        h1 {
+            font-size: 2.4rem;
+            font-weight: 700;
+            letter-spacing: -1.5px;
+            margin-bottom: 0.6rem;
+            color: #111;
+        }
+        .tagline {
+            color: #888;
+            font-size: 1rem;
+            margin-bottom: 3.5rem;
+            line-height: 1.6;
+            font-weight: 400;
+        }
+        .cards {
+            display: flex;
+            gap: 1.2rem;
+            justify-content: center;
+        }
+        .card {
+            background: #ffffff;
+            border: 1px solid #e5e5e5;
+            border-radius: 10px;
+            padding: 2rem 1.8rem;
+            text-decoration: none;
+            color: #111;
+            width: 240px;
+            transition: all 0.2s ease;
+            text-align: left;
+        }
+        .card:hover {
+            border-color: #111;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+        }
+        .card-label {
+            font-size: 0.68rem;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: #999;
+            margin-bottom: 0.6rem;
+            font-weight: 500;
+        }
+        .card h2 {
+            font-size: 1.15rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #111;
+        }
+        .card p {
+            font-size: 0.82rem;
+            color: #888;
+            line-height: 1.5;
+        }
+        .card .arrow {
+            margin-top: 1.2rem;
+            font-size: 0.85rem;
+            color: #bbb;
+            transition: color 0.2s;
+        }
+        .card:hover .arrow { color: #111; }
+        .footer {
+            margin-top: 4rem;
+            font-size: 0.75rem;
+            color: #ccc;
+            letter-spacing: 0.3px;
+        }
+    </style>
 </head>
-
 <body>
+    <div class="landing">
+        <img src="logo.png" alt="VIT-AP University" class="logo-img">
+        <h1>DevOS</h1>
+        <p class="tagline">Developer Productivity Operating System</p>
 
-    <div class="app-contain">
-        <!-- Minimal Sidebar -->
-        <aside class="sidebar">
-            <img src="logo.png" alt="VIT-AP" class="logo-img">
-            <div class="logo">DevOS</div>
+        <div class="cards">
+            <a href="dashboard.html" class="card">
+                <div class="card-label">Interface</div>
+                <h2>Frontend</h2>
+                <p>Workspace dashboard, tasks, notes, and focus timer</p>
+                <div class="arrow">→</div>
+            </a>
+            <a href="backend.html" class="card">
+                <div class="card-label">Database</div>
+                <h2>Backend</h2>
+                <p>Neo4j graph visualizer with live Cypher query editor</p>
+                <div class="arrow">→</div>
+            </a>
+        </div>
 
-            <div class="nav-group">
-                <h3 class="nav-label">Workspace</h3>
-                <nav class="nav-menu">
-                    <a href="index.html" class="nav-item active">Dashboard</a>
-                    <a href="focus.html" class="nav-item">Focus Mode</a>
-                    <a href="#" class="nav-item">Tasks</a>
-                    <a href="#" class="nav-item">Notes</a>
-                </nav>
-            </div>
-
-            <div class="nav-divider"></div>
-
-            <div class="nav-group">
-                <h3 class="nav-label">Manage</h3>
-                <nav class="nav-menu">
-                    <a href="#" class="nav-item">Archive</a>
-                    <a href="#" class="nav-item">Settings</a>
-                </nav>
-            </div>
-        </aside>
-
-        <!-- Main Content -->
-        <main class="main-content">
-            <header class="page-header">
-                <h1>Dashboard</h1>
-                <p class="subtitle">Workspace overview</p>
-            </header>
-
-            <div class="content-stack">
-
-                <!-- Section 1: Tasks -->
-                <section class="content-block">
-                    <h2 class="section-title">TASKS</h2>
-
-                    <div class="task-input-wrapper">
-                        <input type="text" class="task-input" placeholder="Add a new task...">
-                        <button class="btn-add">Add</button>
-                    </div>
-
-                    <div class="task-list empty">
-                        <p class="empty-state-text">No tasks yet</p>
-                    </div>
-                </section>
-
-                <!-- Section 2: Notes -->
-                <section class="content-block">
-                    <h2 class="section-title">QUICK NOTES</h2>
-                    <div class="notes-container">
-                        <textarea class="notes-input" placeholder="Write something..."></textarea>
-                    </div>
-                    <p class="meta-text">Last saved just now</p>
-                </section>
-
-            </div>
-
+        <div class="footer">Web Technology Assignment &middot; VIT-AP University</div>
     </div>
-    </main>
-    </div>
-
 </body>
-
 </html>

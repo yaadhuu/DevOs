@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevOS - Tasks</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+    <div class="app-contain">
+        <!-- Minimal Sidebar -->
+        <aside class="sidebar">
+            <img src="logo.png" alt="VIT-AP" class="logo-img">
+            <div class="logo">DevOS</div>
+
+            <div class="nav-group">
+                <h3 class="nav-label">Workspace</h3>
+                <nav class="nav-menu">
+                    <a href="dashboard.html" class="nav-item">Dashboard</a>
+                    <a href="focus.html" class="nav-item">Focus Mode</a>
+                    <a href="tasks.html" class="nav-item active">Tasks</a>
+                    <a href="notes.html" class="nav-item">Notes</a>
+                </nav>
+            </div>
+
+            <div class="nav-divider"></div>
+
+            <div class="nav-group">
+                <h3 class="nav-label">Manage</h3>
+                <nav class="nav-menu">
+                    <a href="archive.html" class="nav-item">Archive</a>
+                    <a href="settings.html" class="nav-item">Settings</a>
+                </nav>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="page-header">
+                <h1>Tasks</h1>
+                <p class="subtitle">Manage your daily priorities</p>
+            </header>
+
+            <div class="content-stack">
+
+                <section class="content-block">
+                    <h2 class="section-title">ALL TASKS</h2>
+                    <div class="task-input-wrapper">
+                        <input type="text" id="new-task-input" class="task-input" placeholder="Add a new task...">
+                        <button class="btn-add" onclick="addTask()">Add</button>
+                    </div>
+
+                    <div id="task-list-container">
+                        <p class="empty-state-text">Loading tasks...</p>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <script>
+        async function fetchTasks() {
+            try {
+                const res = await fetch('/api/tasks');
+                const data = await res.json();
+                const container = document.getElementById('task-list-container');
+                container.innerHTML = '';
+                if(data.success && data.tasks.length > 0) {
+                    let ul = '<ul class="checklist">';
+                    data.tasks.forEach(task => {
+                        ul += `
+                            <li class="checklist-item">
+                                <input type="checkbox" id="task_${task.id}" ${task.status==='completed'?'checked':''}>
+                                <label for="task_${task.id}">${task.title}</label>
+                            </li>
+                        `;
+                    });
+                    ul += '</ul>';
+                    container.innerHTML = ul;
+                } else {
+                    container.innerHTML = '<p class="empty-state-text" style="font-style: italic;">No tasks yet</p>';
+                }
+            } catch(e) {
+                console.error(e);
+            }
+        }
+        
+        async function addTask() {
+            const input = document.getElementById('new-task-input');
+            const title = input.value.trim();
+            if(!title) return;
+            try {
+                const res = await fetch('/api/tasks', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({title})
+                });
+                if(res.ok) {
+                    input.value = '';
+                    fetchTasks();
+                }
+            } catch(e) {
+                console.error(e);
+            }
+        }
+
+        document.getElementById('new-task-input').addEventListener('keydown', e => {
+            if(e.key === 'Enter') addTask();
+        });
+
+        window.onload = fetchTasks;
+    </script>
+</body>
+</html>
